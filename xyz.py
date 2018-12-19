@@ -1,12 +1,13 @@
 """
 From https://github.com/pele-python/pele/blob/master/pele/utils/xyz.py
 Thanks js850 !
+
+
+Updated to python 3.7
 """
 
 """
 tools for reading from and writing to .xyz files
-
-.. currentmodule:: pele.utils.xyz
 
 .. autosummary::
     :toctree: generated/
@@ -34,30 +35,30 @@ def read_xyz(fin):
     -------
     fin : open file
     xyz : namedtuple
-        returns a named tuple with coords, title and list of atomtypes.
+        returns a named tuple with coords, title and list of atom_types.
 
     See Also
     --------
     write_xyz
 
     """
-    natoms = int(fin.readline())
+    num_atoms = int(fin.readline())
     title = fin.readline()[:-1]
-    coords = np.zeros([natoms, 3], dtype="float64")
-    atomtypes = []
+    coords = np.zeros([num_atoms, 3], dtype="float64")
+    atom_types = []
     for x in coords:
         line = fin.readline().split()
-        atomtypes.append(line[0])
+        atom_types.append(line[0])
         x[:] = [float(x) for x in line[1:4]]
 
-    return namedtuple("XYZFile", ["coords", "title", "atomtypes"])\
-        (coords, title, atomtypes)
+    return namedtuple("XYZFile", ["coords", "title", "atom_types"])\
+        (coords, title, atom_types)
 
 
-def write_xyz(fout, coords, title="", atomtypes=("A",)):
+def write_xyz(file_out, coords, title="", atom_types=("A",)):
     """ write a xyz file from file handle
 
-    Writes coordinates in xyz format. It uses atomtypes as names. The list is
+    Writes coordinates in xyz format. It uses atom_types as names. The list is
     cycled if it contains less entries than there are coordinates,
 
     One can also directly write xyz data which was generated with read_xyz.
@@ -67,19 +68,19 @@ def write_xyz(fout, coords, title="", atomtypes=("A",)):
 
     Parameters
     ----------
-    fout : an open file
+    file_out : an open file
     coords : np.array
         array of coordinates
     title : title section, optional
         title for xyz file
-    atomtypes : iteratable
-        list of atomtypes.
+    atom_types : iterable
+        list of atom_types.
 
     See Also
     --------
     read_xyz
 
     """
-    fout.write(" %d\n%s\n" % (coords.size / 3, title))
-    for x, atomtype in zip(coords.reshape(-1, 3), cycle(atomtypes)):
-        fout.write("\t\t{} {:14.06f} {:14.06f} {:14.06f}\n".format(atomtype, x[0], x[1], x[2]))
+    file_out.write(" %d\n%s\n" % (coords.size / 3, title))
+    for x, atom_type in zip(coords.reshape(-1, 3), cycle(atom_types)):
+        file_out.write("\t\t{} {:14.06f} {:14.06f} {:14.06f}\n".format(atom_type, x[0], x[1], x[2]))

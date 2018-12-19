@@ -36,7 +36,7 @@ def main():
 
             # Do stuff with the data!
             new_atom = None
-            for atom, atom_name in zip(data.coords, data.atomtypes):
+            for atom, atom_name in zip(data.coords, data.atom_types):
                 if atom_name == 'O':
                     if distance(data.coords[H_INDEX], atom) < 1:
                         new_atom = atom
@@ -53,7 +53,7 @@ def main():
                 cords_out += atom
             cords_out += (new_atom, )
             cords_out = np.asarray(cords_out)
-            atom_types_out = data.atomtypes + ['p+', ]
+            atom_types_out = data.atom_types + ['p+', ]
             title_out = data.title
 
             # Write to file
@@ -65,7 +65,7 @@ def main():
 
 def compare_atom_distance(data, index=1):
     print("\n\n\n{}".format(data.title))
-    for atom, atom_name in zip(data.coords, data.atomtypes):
+    for atom, atom_name in zip(data.coords, data.atom_types):
         print("The distance between the 1st H and the {} atom is:"
               "\n\t{} units".format(atom_name, distance(data.coords[index], atom)))
 

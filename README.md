@@ -1,6 +1,6 @@
 # ProtonTransfer
 
-This program find the Hydrogen that moves the most in an .xyz file and assumes that it is the proton.
+This program find the Hydrogen that acts as a proton transfer in an .xyz file .
 
 It then graphs the distance of Hydrogen, The Proton, and all Oxygen in respect to the 1st Oxygen. 
 

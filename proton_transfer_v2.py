@@ -1,12 +1,14 @@
 from xyz import read_xyz, write_xyz
 from Formulas import distance
+from Exceptions import AtomDistanceError
 from mpl_toolkits.mplot3d import Axes3D  # Needed for 3D graph
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 def main():
-    file_name = 'h5o2_2cc_scan_sum'
+    # file_name = 'h5o2_2cc_scan_sum' # Two Water Molecules
+    file_name = 'h13o6_2_scan_sum'  # Six Water molecules
     from_file_path = 'data/' + file_name + '.xyz'
     to_file_path = 'data/' + file_name + '_with_proton_indicator.xyz'
     all_steps = []
@@ -23,7 +25,7 @@ def main():
     # Plot Data
     num_atoms = len(all_steps[0].atom_types)
     proton_index = find_moving_hydrogen(all_steps[0], all_steps[-1])
-    oxygen_indexes = [i for i in range(0, num_atoms) if all_steps[0].atom_types[i] == 'O']
+    oxygen_indexes = [find_closest_oxygen(all_steps[0], proton_index), find_closest_oxygen(all_steps[-1], proton_index)]
     plot_data(all_steps, proton_index, oxygen_indexes)
 
     # Open out file
@@ -42,17 +44,50 @@ def main():
 
 
 def find_moving_hydrogen(step_one, step_last):
-    max_change = 0
-    moving_atom_index = None
-    for i in range(0, len(step_one.coords)):
-        if step_one.atom_types[i] != 'H':
-            continue
-        atom_one, atom_last = step_one.coords[i], step_last.coords[i]
-        delta = distance(atom_one, atom_last)
-        if delta > max_change:
-            max_change = delta
-            moving_atom_index = i
-    return moving_atom_index
+    """
+    Finds the closest Oxygen to each Hydrogen, then finds the hydrogen that moves farthest from the Ox
+    :param step_one: 1st data Step
+    :param step_last: Last Data Step
+    :return: Index of the Free Hydrogen
+    """
+
+    # Part 0, get the indexes of each hydrogen
+    hydrogen = {}  # {h_index: index_of_closes_oxygen}
+    for i in range(0, len(step_one.atom_types)):
+        if step_one.atom_types[i] == 'H':
+            hydrogen.update({i: None})
+
+    # Part One, Find the Oxygen closest to each Hydrogen
+    for index in hydrogen:
+        hydrogen[index] = find_closest_oxygen(step_one, index)
+
+    # Part Two, Figure out which one moved the most
+    max_distance = 0
+    for h_index in hydrogen:
+        dist = distance(step_last.coords[h_index], step_last.coords[hydrogen[h_index]])
+        if dist > max_distance:
+            max_distance = dist
+            index = h_index
+    return index
+
+
+def find_closest_oxygen(step, hydrogen_index):
+    """
+    :param step: the current data step
+    :param hydrogen_index: The index of the hydrogen to find the closet Oxygen to
+    :return: The index of the closest Oxygen to the hydrogen provided
+    """
+    min_distance = 1000000  # Really big
+    index = 0
+    for i in range(0, len(step.atom_types)):
+        if step.atom_types[i] == 'O':
+            cur_dist = distance(step.coords[hydrogen_index], step.coords[i])
+            if cur_dist < min_distance:
+                min_distance = cur_dist
+                index = i
+    if min_distance >= 1000000:  # Checks to make sure min_distance was updated
+        raise AtomDistanceError
+    return index
 
 
 def plot_data(data, proton_index, oxygen_indexes, step=1):
@@ -80,11 +115,14 @@ def plot_data(data, proton_index, oxygen_indexes, step=1):
     
     # Add Data
     xs = [x for x in range(0, num_steps, step)]
+    n = 0
     for ox in y_os:
-        ax.scatter(xs, ox)
+        label = 'Oxygen ' + str(n)
+        ax.scatter(xs, ox, label=label)
+        n += 1
     ax.scatter(xs, y_h, color='r', label='Hydrogen')
     print(len(xs), len(y_p))
-    ax.scatter(xs, y_p, color='g', label='Proton Indicator')
+    ax.scatter(xs, y_p, color='y', label='Proton Indicator')
     ax.legend()
     plt.show()
 

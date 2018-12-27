@@ -9,14 +9,18 @@ class Atom(ABC):
     Abstract Base Class for all atoms
 
     Attributes:
-        x (numeric): x coordinate
-        y (numeric): y coordinate
-        z (numeric): z coordinate
+        :x: (numeric)
+            x coordinate
+        :y: (numeric)
+            y coordinate
+        :z: (numeric)
+            z coordinate
     """
 
     def __init__(self, c=(None, None, None)):
         """
-        :param c: (Optional array-like) Coordinates of current location in the form [x, y, z]
+        :param c: (Optional, 1x3 array-like)
+            Coordinates of current location in the form [x, y, z]
         """
         self.x, self.y, self.z = c
 
@@ -27,13 +31,16 @@ class Atom(ABC):
     def update_coords(self, c):
         """
         Updates Coords to [x, y, z]
-        :param c: (Optional array-like) Coordinates of current location in the form [x, y, z]
+
+        :param c: (Optional, 1x3 array-like)
+            Coordinates of current location in the form [x, y, z]
         """
         self.x, self.y, self.z = c
 
     def current_pos(self):
         """
-        :return: Current coordinates of self
+        :return: (1x3 list)
+            Current coordinates of self
         """
         return [self.x, self.y, self.z]
 
@@ -44,29 +51,36 @@ class Proton(Atom):
     between the proton and the other atoms in the data file.
 
     Attributes:
-        :x (numeric): x coordinate
-        :y (numeric): y coordinate
-        :z (numeric): z coordinate
-        :atom (Atom Object): The atom that the proton is attached to.
+        :x: (numeric)
+            x coordinate
+        :y: (numeric)
+            y coordinate
+        :z: (numeric)
+            z coordinate
+        :atom: (Atom Object)
+            The atom that the proton is attached to.
     """
 
     def __init__(self, c=(None, None, None)):
         """
-        :param c: (Optional array-like) Coordinates of current location in the form [x, y, z]
+        :param c: (Optional, 1x3 array-like)
+            Coordinates of current location in the form [x, y, z]
         """
         self.atom = None
         super().__init__(c=c)
 
     def set_atom(self, atom):
         """
-        :param atom: Atom Object
+        :param atom: (Atom Object)
+            Sets Atom as the location of the proton
         """
         self.update_coords(atom.current_pos())
         self.atom = atom
 
     def __str__(self):
         """
-        :return: Short description of the Proton Object
+        :return: (String)
+            Short description of the Proton Object
         """
         atom_name = 'Proton'
         if self.x is not None and self.y is not None and self.z is not None:
@@ -80,49 +94,63 @@ class Hydrogen(Atom):
     between the Hydrogen atoms and the other atoms in the data file.
 
     Attributes:
-        :x (numeric): x coordinate
-        :y (numeric): y coordinate
-        :z (numeric): z coordinate
-        :home (Oxygen Object): Oxygen atom that the Hydrogen is within one unit of.
-        :distance_to_home (numeric): distance from [x, y, z] to home
+        :x: (numeric)
+            x coordinate
+        :y: (numeric)
+            y coordinate
+        :z: (numeric)
+            z coordinate
+        :home: (Oxygen Object)
+            Oxygen atom that the Hydrogen is within one unit of.
+        :distance_to_closest_ox:  (numeric)
+            distance from [x, y, z] to home
     """
 
     def __init__(self, c=(None, None, None), home=None):
         """
-        :param c: (Optional array-like) Coordinates of current location in the form [x, y, z]
-        :param home (Optional Oxygen Object): Oxygen atom that the Hydrogen is within one unit of.
-                                                If no such atom exists, is None
+        :param c: (Optional array-like)
+            Coordinates of current location in the form [x, y, z]
+        :param home: (Optional Oxygen Object)
+            Oxygen atom that the Hydrogen is within one unit of.
+            If no such atom exists, is None
         """
         super().__init__(c=c)
         self.home = home
         if home is not None and c is not None:
-            self.distance_to_home = distance(home.current_pos(), c)
+            self.distance_to_closest_ox = distance(home.current_pos(), c)
         else:
-            self.distance_to_home = None
+            self.distance_to_closest_ox = None
 
     def find_home(self, ox_list):
         """
         Finds the Oxygen Atom within CUT_OFF_DISTANCE from at list and sets it as home
-        :global CUT_OFF_DISTANCE: Cut off distance for H - O bonding, in 1 ≤ r ≤ 1.2, but the closer to 1 the better
+
+        :global CUT_OFF_DISTANCE: (Constant, float)
+            Cut off distance for H - O bonding, in 1 ≤ r ≤ 1.2, but the closer to 1 the better
         :param ox_list: (OxygenList Object)
-        :return: Home, If an home is found: returns Oxygen Object, else: returns None
+
+        :return: (Oxygen Object)
+            Home, If an home is found: returns Oxygen Object, else: returns None
         """
+        self.distance_to_closest_ox = 1000000
         global CUT_OFF_DISTANCE
         for ox in ox_list.atom_list:
             dist = distance(self.current_pos(), ox.current_pos())
+            if dist < self.distance_to_closest_ox:
+                self.distance_to_closest_ox = dist
             if dist < CUT_OFF_DISTANCE:
                 self.home = ox
-                self.distance_to_home = dist
+                self.distance_to_closest_ox = dist
                 break
         else:  # if no-break
             self.home = None
-            self.distance_to_home = 0
         return self.home
 
     def __str__(self):
         atom_name = 'Hydrogen'
         """
-        :return: Short description of the Hydrogen Object
+        :return: (String)
+            Short description of the Hydrogen Object
         """
         if self.x is not None and self.y is not None and self.z is not None:
             return 'This is {} atom at ({}, {}, {})'.format(atom_name, self.x, self.y, self.z)
@@ -135,20 +163,25 @@ class Oxygen(Atom):
     between the Oxygen atoms and the other atoms in the data file.
 
     Attributes:
-        :x (numeric): x coordinate
-        :y (numeric): y coordinate
-        :z (numeric): z coordinate
+        :x: (numeric)
+            x coordinate
+        :y: (numeric)
+            y coordinate
+        :z: (numeric)
+            z coordinate
     """
 
     def __init__(self, c=(None, None, None)):
         """
-        :param c: (Optional array-like) Coordinates of current location in the form [x, y, z]
+        :param c: (Optional, 1x3 array-like)
+            Coordinates of current location in the form [x, y, z]
         """
         super().__init__(c=c)
 
     def __str__(self):
         """
-        :return: Short description of the Oxygen Object
+        :return: (String)
+            Short description of the Oxygen Object
         """
         atom_name = 'Oxygen'
         if self.x is not None and self.y is not None and self.z is not None:
@@ -161,8 +194,10 @@ class AtomList(object):
     Holds Atom Objects and provides methods to make sub-lists of a particular atom-type
 
     Attributes:
-        :atom_list (list): List of ATOM_TYPE Objects
-        :ATOM_TYPE (Atom Class): Only objects of this type can be added to atom_list
+        :atom_list: (list)
+            List of ATOM_TYPE Objects
+        :ATOM_TYPE: (Atom Class)
+            Only objects of this type can be added to atom_list
     """
 
     # Will only accept atoms of type: (all)
@@ -174,7 +209,8 @@ class AtomList(object):
             is not the correct atom type, (or not even an atom)
             it is not added to the list
 
-        :param args (Optional): Atoms of type ATOM_TYPE
+        :param args (Optional, Object of type ATOM_TYPE):
+            Atoms of type ATOM_TYPE
         """
         self.atom_list = []
         for element in args:
@@ -184,7 +220,9 @@ class AtomList(object):
     def add_atom(self, atom):
         """
         Adds an Atom to the atom_list
-        :param atom: (Object of type ATOM_TYPE) Atom to be added
+
+        :param atom: (Object of type ATOM_TYPE)
+            Atom to be added
         """
         if isinstance(atom, self.ATOM_TYPE):
             self.atom_list.append(atom)
@@ -195,7 +233,9 @@ class AtomList(object):
     def make_hydrogen_list(self):
         """
         Creates a Hydrogen List containing all Hydrogen Atoms in atom_list
-        :return: A Hydrogen list
+
+        :return: (HydrogenList Object)
+            A Hydrogen list
         """
         hl = HydrogenList()
         for atom in self.atom_list:
@@ -205,7 +245,9 @@ class AtomList(object):
     def make_oxygen_list(self):
         """
         Creates an Oxygen List containing all Oxygen Atoms in atom_list
-        :return: An Oxygen List
+
+        :return: (OxygenList Object)
+            An Oxygen List
         """
         oxl = OxygenList()
         for atom in self.atom_list:
@@ -218,8 +260,10 @@ class HydrogenList(AtomList):
     Holds Hydrogen Objects and provides methods to manipulate the hydrogen atoms
 
     Attributes:
-        :atom_list (list): List of ATOM_TYPE Objects
-        :ATOM_TYPE (Hydrogen Class): Only objects of this type can be added to atom_list
+        :atom_list: (list)
+            List of ATOM_TYPE Objects
+        :ATOM_TYPE: (Hydrogen Class)
+            Only objects of this type can be added to atom_list
     """
 
     # Will only accept atoms of type: (Hydrogen)
@@ -228,7 +272,9 @@ class HydrogenList(AtomList):
     def find_homes(self, ox_list):
         """
         Updates all the Hydrogen Atom's Homes
-        :param ox_list: (OxygenList Object) Oxygen List object to find homes in
+
+        :param ox_list: (OxygenList Object)
+            Oxygen List object to find homes in
         """
         for hydrogen in self.atom_list:
             hydrogen.find_home(ox_list)
@@ -239,8 +285,10 @@ class OxygenList(AtomList):
     Holds Oxygen Objects
 
     Attributes:
-        :atom_list (list): List of ATOM_TYPE Objects
-        :ATOM_TYPE (Oxygen Class): Only objects of this type can be added to atom_list
+        :atom_list: (list)
+            List of ATOM_TYPE Objects
+        :ATOM_TYPE: (Oxygen Class)
+            Only objects of this type can be added to atom_list
     """
 
     # Will only accept atoms of type: (Oxygen)

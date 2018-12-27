@@ -7,21 +7,22 @@ def distance(cord_1, cord_2, zero_fill=True):
     Calculates the Euclidean distance between two points.
 
 
-    :param cord_1:
-        Numeric Iterable object, Coords of First Point
+    :param cord_1: (Array-like, numeric)
+        Coords of First Point
 
-    :param cord_2:
-        Numeric Iterable object, Coords of Second Point
+    :param cord_2: (Array-like, numeric)
+        Coords of Second Point
 
-    :param zero_fill: Optional, (default: True):
+    :param zero_fill: (Optional, Boolean, (default=True)):
         The points should have the same dimensionality, ie, both in R^n,
-            if they do not then There are two options:
+        if they do not then There are two options:
                 if Zero_Fill: (Default)
                     missing dimensionality is assumed to be zero
                 else:
                     least Squares Approximation is used
 
-    :return: Distance between the two points
+    :return: (float)
+        Distance between the two points
 
     Examples:
         distance([0], [5])) --> 5
@@ -41,13 +42,19 @@ def distance(cord_1, cord_2, zero_fill=True):
             raise DifferentDimensionsError
 
     except DifferentDimensionsError:
+
+        # uses Least Squares Approx
         if not zero_fill:
+            # TODO: Switch Print Statement To logger
             print("{} and {} do not have the same dimensions. Using Least Squares Approx".format(cord_1, cord_2))
             if len(cord_1) > len(cord_2):
                 return distance(cord_1[:len(cord_2)], cord_2)
             else:
                 return distance(cord_1, cord_2[:len(cord_1)])
+
+        # Assumes missing dimensions are Zero
         else:
+            # TODO: Switch Print Statement To logger
             print("{} and {} do not have the same dimensions. "
                   "Assuming missing dimensions are zero".format(cord_1, cord_2))
             if len(cord_1) > len(cord_2):

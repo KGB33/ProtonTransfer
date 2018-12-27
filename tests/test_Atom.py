@@ -41,7 +41,7 @@ class TestHydrogen(unittest.TestCase):
 
     def test_init_with_params(self):
         h = Hydrogen(c=[27.5, 28, 28], home=o_one)
-        self.assertEqual(0.5, h.distance_to_home)
+        self.assertEqual(0.5, h.distance_to_closest_ox)
         self.assertEqual(o_one, h.home)
 
     def test_find_home(self):

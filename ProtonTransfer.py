@@ -1,10 +1,10 @@
 from xyz import read_xyz, write_xyz
 from Formulas import distance
-from Exceptions import AtomDistanceError, UnknownAtomError
+from Exceptions import UnknownAtomError
 from mpl_toolkits.mplot3d import Axes3D  # Needed for 3D graph
 import matplotlib.pyplot as plt
 import numpy as np
-from Atoms import Hydrogen, HydrogenList, Oxygen, OxygenList, Proton, AtomList
+from Atoms import Hydrogen, HydrogenList, Oxygen, OxygenList, Proton
 
 
 def main():
@@ -65,7 +65,6 @@ def main():
                 write_xyz(out_file, out_coords, out_title, out_atom_types)
             except ValueError:
                 break
-        print(proton_coords)
         plot_data(proton_coords)
 
 

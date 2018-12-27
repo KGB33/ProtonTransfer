@@ -39,6 +39,11 @@ class TestHydrogen(unittest.TestCase):
         h = Hydrogen()
         self.assertIsNone(h.home)
 
+    def test_init_with_params(self):
+        h = Hydrogen(c=[27.5, 28, 28], home=o_one)
+        self.assertEqual(0.5, h.distance_to_home)
+        self.assertEqual(o_one, h.home)
+
     def test_find_home(self):
         h = Hydrogen()
         set_coords(h)
@@ -92,6 +97,12 @@ class TestHydrogen(unittest.TestCase):
 
 class TestProton(unittest.TestCase):
 
+    def test_set_atom(self):
+        p = Proton()
+        p.set_atom(h_one)
+        self.assertEqual(p.atom, h_one)
+        self.assertEqual([28, 28, 28], p.current_pos())
+
     def test_str_no_coords(self):
         p = Proton()
         self.assertEqual('This is Proton at (Unknown Coords)', str(p))
@@ -99,7 +110,7 @@ class TestProton(unittest.TestCase):
     def test_str_with_coords(self):
         p = Proton()
         set_coords(p)
-        self.assertEqual('This is Proton at (28, 28, 28)', str(p))
+        self.assertEqual('This Proton is attached to: 28', str(p))
 
 
 class TestOxygen(unittest.TestCase):
@@ -126,6 +137,22 @@ class TestAtomList(unittest.TestCase):
         a = AtomList()
         a.add_atom([123, '456'])
         self.assertFalse(a.atom_list)
+
+    def test_make_hydrogen_list(self):
+        a = AtomList()
+        a.add_atom(h_one)
+        a.add_atom(h_two)
+        a.add_atom(o_one)
+        a.add_atom(o_two)
+        self.assertEqual([h_one, h_two], a.make_hydrogen_list().atom_list)
+
+    def test_make_oxygen_list(self):
+        a = AtomList()
+        a.add_atom(h_one)
+        a.add_atom(h_two)
+        a.add_atom(o_one)
+        a.add_atom(o_two)
+        self.assertEqual([o_one, o_two], a.make_oxygen_list().atom_list)
 
 
 class TestHydrogenList(unittest.TestCase):

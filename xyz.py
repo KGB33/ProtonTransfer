@@ -42,17 +42,21 @@ def read_xyz(fin):
     write_xyz
 
     """
-    num_atoms = int(fin.readline())
-    title = fin.readline()[:-1]
-    coords = np.zeros([num_atoms, 3], dtype="float64")
-    atom_types = []
-    for x in coords:
-        line = fin.readline().split()
-        atom_types.append(line[0])
-        x[:] = [float(x) for x in line[1:4]]
+    try:
+        num_atoms = int(fin.readline())
+        title = fin.readline()[:-1]
+        coords = np.zeros([num_atoms, 3], dtype="float64")
+        atom_types = []
+        for x in coords:
+            line = fin.readline().split()
+            atom_types.append(line[0])
+            x[:] = [float(x) for x in line[1:4]]
 
-    return namedtuple("XYZFile", ["coords", "title", "atom_types"])\
-        (coords, title, atom_types)
+        return namedtuple("XYZFile", ["coords", "title", "atom_types"])\
+            (coords, title, atom_types)
+    except ValueError:
+        # End of file reached
+        return None
 
 
 def write_xyz(file_out, coords, title="", atom_types=("A",)):

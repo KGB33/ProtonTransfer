@@ -189,6 +189,38 @@ class Oxygen(Atom):
         return 'This is {} atom at (Unknown Coords)'.format(atom_name)
 
 
+class Nitrogen(Atom):
+    """
+    This class holds the positional data and the relationship
+    between the Nitrogen atoms and the other atoms in the data file.
+
+    Attributes:
+        :x: (numeric)
+            x coordinate
+        :y: (numeric)
+            y coordinate
+        :z: (numeric)
+            z coordinate
+    """
+
+    def __init__(self, c=(None, None, None)):
+        """
+        :param c: (Optional, 1x3 array-like)
+            Coordinates of current location in the form [x, y, z]
+        """
+        super().__init__(c=c)
+
+    def __str__(self):
+        """
+        :return: (String)
+            Short description of the Nitrogen Object
+        """
+        atom_name = 'Nitrogen'
+        if self.x is not None and self.y is not None and self.z is not None:
+            return 'This is {} atom at ({}, {}, {})'.format(atom_name, self.x, self.y, self.z)
+        return 'This is {} atom at (Unknown Coords)'.format(atom_name)
+    
+
 class AtomList(object):
     """
     Holds Atom Objects and provides methods to make sub-lists of a particular atom-type
@@ -253,6 +285,18 @@ class AtomList(object):
         for atom in self.atom_list:
             oxl.add_atom(atom)
         return oxl
+    
+    def make_nitrogen_list(self):
+        """
+        Creates an Nitrogen List containing all Nitrogen Atoms in atom_list
+
+        :return: (NitrogenList Object)
+            An Nitrogen List
+        """
+        nit = NitrogenList()
+        for atom in self.atom_list:
+            nit.add_atom(atom)
+        return nit
 
 
 class HydrogenList(AtomList):
@@ -269,15 +313,21 @@ class HydrogenList(AtomList):
     # Will only accept atoms of type: (Hydrogen)
     ATOM_TYPE = Hydrogen
 
-    def find_homes(self, ox_list):
+    def find_homes(self, oxygen_list, nitrogen_list):
         """
         Updates all the Hydrogen Atom's Homes
 
-        :param ox_list: (OxygenList Object)
-            Oxygen List object to find homes in
+        :param oxygen_list: (OxygenList Object)
+            OxygenList object to find homes in
+
+        :param nitrogen_list: (NitrogenList Object)
+            NitrogenList object to find homes in
         """
+        nox_list = NitrogenOxygenList()
+        nox_list.construct_list(oxygen_list, nitrogen_list)
+
         for hydrogen in self.atom_list:
-            hydrogen.find_home(ox_list)
+            hydrogen.find_home(nox_list)
 
 
 class OxygenList(AtomList):
@@ -293,3 +343,56 @@ class OxygenList(AtomList):
 
     # Will only accept atoms of type: (Oxygen)
     ATOM_TYPE = Oxygen
+    
+    
+class NitrogenList(AtomList):
+    """
+    Holds Nitrogen Objects
+
+    Attributes:
+        :atom_list: (list)
+            List of ATOM_TYPE Objects
+        :ATOM_TYPE: (Nitrogen Class)
+            Only objects of this type can be added to atom_list
+    """
+
+    # Will only accept atoms of type: (Nitrogen)
+    ATOM_TYPE = Nitrogen
+
+
+class NitrogenOxygenList(AtomList):
+    """
+    Holds Nitrogen and Oxygen Objects
+
+    Attributes:
+        :atom_list: (list)
+            List of ATOM_TYPE Objects
+        :ATOM_TYPE: (Nitrogen and Oxygen Class)
+            Only objects of this type can be added to atom_list
+    """
+
+    def add_atom(self, atom):
+        """
+        Adds an Nitrogen or Oxygen atom to the atom_list
+
+        :param atom: (Object of type Oxygen or Nitrogen)
+            Atom to be added
+        """
+        if isinstance(atom, Oxygen) or isinstance(atom, Nitrogen):
+            self.atom_list.append(atom)
+        else:
+            # print(atom, " Was not added to :", self)
+            pass
+
+    def construct_list(self, ox_list, n_list):
+        """
+        Overwrites the current atom_list with the ox_list + n_list
+
+        :param ox_list: (OxygenList)
+            The Oxygen atoms to be added
+
+        :param n_list: (NitrogenList)
+            The Nitrogen Atoms to be added
+        :return:
+        """
+        self.atom_list = ox_list.atom_list + n_list.atom_list

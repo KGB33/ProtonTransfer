@@ -18,8 +18,8 @@ def main():
 
     # TODO: switch over to using path module
     """ File Name(s) """
-    # file_name = 'h5o2_2cc_scan_sum'  # Two Water Molecules
-    file_name = 'h13o6_2_scan_sum'  # Six Water molecules
+    file_name = 'h5o2_2cc_scan_sum'  # Two Water Molecules
+    # file_name = 'h13o6_2_scan_sum'  # Six Water molecules
 
     # In File Path
     from_file_path = 'data/' + file_name + '.xyz'
@@ -38,9 +38,10 @@ def main():
                 atom_list = atom_factory(data)
                 h_list = atom_list.make_hydrogen_list()
                 ox_list = atom_list.make_oxygen_list()
+                n_list = atom_list.make_nitrogen_list()
 
                 # Find the proton and add it's Coords
-                proton_coords += [find_proton(h_list, ox_list)]
+                proton_coords += [find_proton(h_list, ox_list, n_list)]
 
                 # Write Data
                 write_data(data, out_file, proton_coords)
@@ -77,13 +78,18 @@ def write_data(data, out_file, proton_coords):
     write_xyz(out_file, out_coords, out_title, out_atom_types)
 
 
-def find_proton(h_list, ox_list):
+def find_proton(h_list, ox_list, n_list):
     """
-    Finds the Coordinates of the proton by finding the Oxygen with 3 residents, or the Hydrogen without a home
+    Finds the Coordinates of the proton by finding
+        the Oxygen with 3 residents,
+        the Nitrogen with 4 residents,
+        or the Hydrogen without a home
 
     :param h_list: (HydrogenList)
 
     :param ox_list: (OxygenList)
+
+    :param n_list: (NitrogenList)
 
     :return: (1x3 Array-Like)
         Coordinates of proton, [x, y, z]
@@ -93,7 +99,7 @@ def find_proton(h_list, ox_list):
     homeless = []
 
     # Calculate Homes for each Hydrogen Atom
-    h_list.find_homes(ox_list)
+    h_list.find_homes(ox_list, n_list)
 
     # Find any Hydrogen atoms without a Home
     for h in h_list.atom_list:

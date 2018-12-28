@@ -171,7 +171,8 @@ class TestHydrogenList(unittest.TestCase):
         self.assertEqual([h_one, h_two, h_three], hl.atom_list)
 
     def test_find_homes(self):
-        h_list.find_homes(ox_list)
+        n_list = NitrogenList()
+        h_list.find_homes(ox_list, n_list)
         self.assertEqual(ox_list.atom_list[0], h_list.atom_list[0].home)
         self.assertEqual(ox_list.atom_list[0], h_list.atom_list[1].home)
         self.assertEqual(ox_list.atom_list[0], h_list.atom_list[2].home)

@@ -87,4 +87,4 @@ def write_xyz(file_out, coords, title="", atom_types=("A",)):
     """
     file_out.write(" %d\n%s\n" % (coords.size / 3, title))
     for x, atom_type in zip(coords.reshape(-1, 3), cycle(atom_types)):
-        file_out.write("\t\t{} {:14.06f} {:14.06f} {:14.06f}\n".format(atom_type, x[0], x[1], x[2]))
+        file_out.write("\t\t{:<3} {:14.06f} {:14.06f} {:14.06f}\n".format(atom_type, x[0], x[1], x[2]))

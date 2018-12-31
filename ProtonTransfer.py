@@ -69,7 +69,7 @@ def write_data(data, out_file, proton_coords):
     out_coords = np.asarray(out_coords)
 
     # Format out_atom_types
-    out_atom_types = data.atom_types + ['p+']
+    out_atom_types = data.atom_types + ['DUM']
 
     # Format out_title
     out_title = data.title

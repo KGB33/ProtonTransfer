@@ -2,8 +2,11 @@
 From https://github.com/pele-python/pele/blob/master/pele/utils/xyz.py
 Thanks js850 !
 
-
-Updated to python 3.7
+Changes:
+    - Updated to python 3.7
+    - Renamed atomtypes to atom_types
+    - Added EOF detector
+    - formatted output
 """
 
 """

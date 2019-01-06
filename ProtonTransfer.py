@@ -6,6 +6,26 @@ import numpy as np
 from Atoms import Hydrogen, Oxygen, Proton, AtomList
 from functools import partial
 from collections import namedtuple
+from argparse import ArgumentParser
+
+
+# Arg Parser
+def get_args(args=None):
+    """
+    Default Function to parse command line arguments
+    """
+    parser = ArgumentParser(description='See header of script')
+    parser.add_argument(
+        '-i',
+        '--infile_name',
+        help='Input File Name',
+        required=True)
+    parser.add_argument(
+        '-g',
+        '--graph',
+        help='Graphs The dist of proton indicator from (0,0,0)',
+        required=False)
+    return parser.parse_args(args)
 
 
 def main():
@@ -16,14 +36,12 @@ def main():
      - adds a proton indicator and writes each step to an out_file
     """
 
-    # TODO: switch over to using path module
-    """ File Name(s) """
-    file_name = 'h5o2_2cc_scan_sum'  # Two Water Molecules
-    # file_name = 'h13o6_2_scan_sum'  # Six Water molecules
+    args = get_args(None)  # Gets args from command line
 
+    """ File Name(s) """
+    file_name = args.infile_name
     # In File Path
     from_file_path = 'data/' + file_name + '.xyz'
-
     # Out File Path
     to_file_path = 'data/' + file_name + '_with_proton_indicator.xyz'
 
@@ -47,7 +65,8 @@ def main():
                 write_data(data, out_file, proton_coords)
 
         # Plot Data
-        plot_data(proton_coords)
+        if args.graph:
+            plot_data(proton_coords)
 
 
 def write_data(data, out_file, proton_coords):

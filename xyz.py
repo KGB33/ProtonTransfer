@@ -7,6 +7,7 @@ Changes:
     - Renamed atomtypes to atom_types
     - Added EOF detector
     - formatted output
+    - turned read_xyz into a generator function
 """
 
 """
@@ -26,17 +27,17 @@ from collections import namedtuple
 __all__ = ["read_xyz", "write_xyz"]
 
 
-def read_xyz(fin):
-    """ read a xyz file from file handle
+def read_xyz(in_file):
+    """
+    reads a xyz file from file name and yields data step by step
 
     Parameters
     ----------
-    fin : file handle
+    in_file : file name
         file to read from
 
-    Returns
+    Yields
     -------
-    fin : open file
     xyz : namedtuple
         returns a named tuple with coords, title and list of atom_types.
 
@@ -45,21 +46,22 @@ def read_xyz(fin):
     write_xyz
 
     """
-    try:
-        num_atoms = int(fin.readline())
-        title = fin.readline()[:-1]
-        coords = np.zeros([num_atoms, 3], dtype="float64")
-        atom_types = []
-        for x in coords:
-            line = fin.readline().split()
-            atom_types.append(line[0])
-            x[:] = [float(x) for x in line[1:4]]
+    with open(in_file) as fin:
+        while True:
+            try:
+                num_atoms = int(fin.readline())
+                title = fin.readline()[:-1]
+                coords = np.zeros([num_atoms, 3], dtype="float64")
+                atom_types = []
+                for x in coords:
+                    line = fin.readline().split()
+                    atom_types.append(line[0])
+                    x[:] = [float(x) for x in line[1:4]]
 
-        return namedtuple("XYZFile", ["coords", "title", "atom_types"])\
-            (coords, title, atom_types)
-    except ValueError:
-        # End of file reached
-        return None
+                yield namedtuple("XYZFile", ["coords", "title", "atom_types"])\
+                    (coords, title, atom_types)
+            except ValueError:
+                break
 
 
 def write_xyz(file_out, coords, title="", atom_types=("A",)):

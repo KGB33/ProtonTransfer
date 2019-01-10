@@ -6,10 +6,10 @@ from argparse import ArgumentParser
 
 # Constants!
 CUT_OFF_DISTANCE_O_H = 1.005  # must be in 1 ≤ r ≤ 1.2, but the closer to 1 the better
-CUT_OFF_DISTANCE_N_H = 1.000  # UNK TODO: Find range
-R_LIST = 2.60                 # From paper, see citations #TODO: Add Citations
+CUT_OFF_DISTANCE_N_H = 1.200  # must be in 1.2 ≤ r ≤ 1.4 but the closer to 1.2 the better
+R_LIST = 2.60                 # From paper, see readme for citations
 """
-Cut off np.linalg.norm for H - O bonding and H - N bonding respectively 
+Cut off distance for H - O bonding and H - N bonding respectively 
 experimental found by looking at the graph (-g command line arg) with minimal to no outliers
 """
 
@@ -46,9 +46,9 @@ def main():
     """ File Name(s) """
     file_name = args.infile_name
     # In File Path
-    from_file_path = 'data/' + file_name + '.xyz'
+    from_file_path = file_name + '.xyz'
     # Out File Path
-    to_file_path = 'data/' + file_name + '_with_proton_indicator.xyz'
+    to_file_path = file_name + '_with_proton_indicator.xyz'
 
     # Instance Variables
     proton_coords = []  # only used for graphing
@@ -88,7 +88,7 @@ def find_lone_hydrogen(data):
             return h
     for h in data.hydrogen:
         for n in data.nitrogen:
-            if np.dot(h - n, h - ox) <= CUT_OFF_DISTANCE_N_H:
+            if np.dot(h - n, h - n) <= CUT_OFF_DISTANCE_N_H:
                 break
         else:
             return h
@@ -141,8 +141,8 @@ def sort_atoms(step):
         else:
             other_atoms.append(coords)
             
-    return namedtuple('SortedAtomCoords', ['hydrogen', 'oxygen', 'nitrogen', 'other_atoms'])\
-        (hydrogen, oxygen, nitrogen, other_atoms)
+    return namedtuple('SortedAtomCoords', ['hydrogen', 'oxygen', 'nitrogen', 'other_atoms']
+                      )(hydrogen, oxygen, nitrogen, other_atoms)
 
 
 def write_data(data, out_file, proton_coord):

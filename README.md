@@ -5,7 +5,7 @@ This is a command line tool that creates a novel proton indicator from a coordin
 
 ## Arguments:
 * -i file name
-  * The name of the data to be analyzed
+  * The name of the data to be analyzed (without the .xyz extension)
 * -g Boolean
   * Optional argument to display a graph of the Indicators distance from the origin
 
@@ -23,7 +23,8 @@ This is a command line tool that creates a novel proton indicator from a coordin
 
 Alternatively:
 * Python 3+
-* Numpy
+* numpy
+* matplotlib
 
  ## Citations:
  

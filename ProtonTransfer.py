@@ -1,11 +1,36 @@
 from xyz import read_xyz, write_xyz
-from Formulas import distance
-from Exceptions import UnknownAtomError
 import matplotlib.pyplot as plt
 import numpy as np
-from Atoms import Hydrogen, Oxygen, Proton, AtomList
-from functools import partial
 from collections import namedtuple
+from argparse import ArgumentParser
+
+# Constants!
+CUT_OFF_DISTANCE_O_H = 1.005  # must be in 1 ≤ r ≤ 1.2, but the closer to 1 the better
+CUT_OFF_DISTANCE_N_H = 1.200  # must be in 1.2 ≤ r ≤ 1.4 but the closer to 1.2 the better
+R_LIST = 2.60                 # From paper, see readme for citations
+"""
+Cut off distance for H - O bonding and H - N bonding respectively 
+experimental found by looking at the graph (-g command line arg) with minimal to no outliers
+"""
+
+
+# Arg Parser
+def get_args(args=None):
+    """
+    Default Function to parse command line arguments
+    """
+    parser = ArgumentParser(description='See header of script')
+    parser.add_argument(
+        '-i',
+        '--infile_name',
+        help='Input File Name',
+        required=True)
+    parser.add_argument(
+        '-g',
+        '--graph',
+        help='Graphs The dist of proton indicator from (0,0,0)',
+        required=False)
+    return parser.parse_args(args)
 
 
 def main():
@@ -16,41 +41,111 @@ def main():
      - adds a proton indicator and writes each step to an out_file
     """
 
-    # TODO: switch over to using path module
+    args = get_args(None)  # Gets args from command line
+
     """ File Name(s) """
-    file_name = 'h5o2_2cc_scan_sum'  # Two Water Molecules
-    # file_name = 'h13o6_2_scan_sum'  # Six Water molecules
-
+    file_name = args.infile_name
     # In File Path
-    from_file_path = 'data/' + file_name + '.xyz'
-
+    from_file_path = file_name + '.xyz'
     # Out File Path
-    to_file_path = 'data/' + file_name + '_with_proton_indicator.xyz'
+    to_file_path = file_name + '_with_proton_indicator.xyz'
 
     # Instance Variables
-    proton_coords = []
+    proton_coords = []  # only used for graphing
 
     # Read Files
-    with open(from_file_path) as in_file, open(to_file_path, 'w') as out_file:
-        for data in iter(partial(read_xyz, in_file), None):
+    data_generator = read_xyz(from_file_path)
+    with open(to_file_path, 'w') as out_file:
+        # Calculate Proton Indicator position for all steps
+        # and change Donor if necessary
+        for step in data_generator:
+                data = sort_atoms(step)
+                donor_coord = find_donor(data)
 
-                # Create Atom Objects for each atom
-                atom_list = atom_factory(data)
-                h_list = atom_list.make_hydrogen_list()
-                ox_list = atom_list.make_oxygen_list()
-                n_list = atom_list.make_nitrogen_list()
+                if donor_coord is None:
+                    proton_coord = find_lone_hydrogen(data)
+                else:
+                    # find Proton Indicator
+                    proton_coord, donor_coord = find_proton_indicator(data, donor_coord)
 
-                # Find the proton and add it's Coords
-                proton_coords += [find_proton(h_list, ox_list, n_list)]
+                if args.graph:
+                    proton_coords += [proton_coord, ]
 
                 # Write Data
-                write_data(data, out_file, proton_coords)
+                write_data(step, out_file, proton_coord)
 
         # Plot Data
-        plot_data(proton_coords)
+        if args.graph:
+            plot_data(proton_coords)
 
 
-def write_data(data, out_file, proton_coords):
+def find_lone_hydrogen(data):
+    for h in data.hydrogen:
+        for ox in data.oxygen:
+            if np.dot(h - ox, h - ox) <= CUT_OFF_DISTANCE_O_H:
+                break
+        else:
+            return h
+    for h in data.hydrogen:
+        for n in data.nitrogen:
+            if np.dot(h - n, h - n) <= CUT_OFF_DISTANCE_N_H:
+                break
+        else:
+            return h
+
+
+def find_donor(data):
+
+    # test Oxygen first
+
+    for ox in data.oxygen:
+        num_hy = len([1 for h in data.hydrogen if np.dot(ox - h, ox - h) < CUT_OFF_DISTANCE_O_H])
+        if num_hy == 3:
+            return ox
+
+    # Test Nitrogen
+    for n in data.nitrogen:
+        num_hy = len([1 for h in data.hydrogen if np.dot(n - h, n - h) < CUT_OFF_DISTANCE_N_H])
+        if num_hy == 4:
+            return n
+    # No atoms had a spare hydrogen to donate
+    return None
+
+
+def sort_atoms(step):
+    """
+    sort atoms into atom_types
+    :param step: namedtuple
+        fields:
+            atom_types: atom names
+            coords: atom coords
+            title: step title (not used)
+    :return: namedtuple
+        fields:
+            hydrogen
+            oxygen
+            nitrogen
+            other_atoms
+    """
+    hydrogen = []
+    oxygen = []
+    nitrogen = []
+    other_atoms = []
+    for atom, coords in zip(step.atom_types, step.coords):
+        if atom == 'O':
+            oxygen.append(coords)
+        elif atom == 'N':
+            nitrogen.append(coords)
+        elif atom == 'H':
+            hydrogen.append(coords)
+        else:
+            other_atoms.append(coords)
+            
+    return namedtuple('SortedAtomCoords', ['hydrogen', 'oxygen', 'nitrogen', 'other_atoms']
+                      )(hydrogen, oxygen, nitrogen, other_atoms)
+
+
+def write_data(data, out_file, proton_coord):
     """
     Formats data to pass into write_xyz
 
@@ -58,15 +153,16 @@ def write_data(data, out_file, proton_coords):
         Data to be added to
     :param out_file: (File Pointer)
         File to be written to
-    :param proton_coords: (Nx3 Array-Like)
+    :param proton_coord: (1x3 Array-Like)
         Coordinate of proton indicator to add
     """
     # Format out_coords
     out_coords = []
     for i in zip(data.coords):
         out_coords += i
-    out_coords += (proton_coords[-1],)
+    out_coords += (proton_coord,)
     out_coords = np.asarray(out_coords)
+    # print(out_coords)
 
     # Format out_atom_types
     out_atom_types = data.atom_types + ['DUM']
@@ -78,79 +174,9 @@ def write_data(data, out_file, proton_coords):
     write_xyz(out_file, out_coords, out_title, out_atom_types)
 
 
-def find_proton(h_list, ox_list, n_list):
-    """
-    Finds the Coordinates of the proton by finding
-        the Oxygen with 3 residents,
-        the Nitrogen with 4 residents,
-        or the Hydrogen without a home
-
-    :param h_list: (HydrogenList)
-
-    :param ox_list: (OxygenList)
-
-    :param n_list: (NitrogenList)
-
-    :return: (1x3 Array-Like)
-        Coordinates of proton, [x, y, z]
-    """
-    # Variables
-    proton_indicator = Proton()
-    homeless = []
-
-    # Calculate Homes for each Hydrogen Atom
-    h_list.find_homes(ox_list, n_list)
-
-    # Find any Hydrogen atoms without a Home
-    for h in h_list.atom_list:
-        if h.home is None:
-            homeless.append(h)
-
-    # Finds the Homeless Hydrogen atom farthest from an Oxygen
-    if homeless:
-        max_h = homeless[0]
-        for h in homeless:
-            if h.distance_to_closest_ox > max_h.distance_to_closest_ox:
-                max_h = h
-        proton_indicator.set_atom(homeless[0])
-
-    # If no Hydrogen is homeless, it finds the oxygen with 3 residents
-    else:
-        for ox in ox_list.atom_list:
-            residents = 0
-            for h in h_list.atom_list:
-                if h.home == ox:
-                    residents += 1
-            if residents >= 3:
-                proton_indicator.set_atom(ox)
-
-    return proton_indicator.current_pos()
-
-
-def atom_factory(data: namedtuple) -> AtomList:
-    """
-    Takes in namedtuple Data and creates atoms and adds them to an AtomList
-
-    :param data: (namedtuple)
-        Named Tuple with fields coords, atom_types, title
-
-    :return: (AtomList)
-        AtomList with atoms created from data
-    """
-    atom_list = AtomList()
-    for atom, coords in zip(data.atom_types, data.coords):
-        if atom == 'H':
-            atom_list.add_atom(Hydrogen(c=coords))
-        elif atom == 'O':
-            atom_list.add_atom(Oxygen(c=coords))
-        else:
-            raise UnknownAtomError
-    return atom_list
-
-
 def plot_data(proton_coords, step=1):
     """
-    Plots distance of the proton indicator from the origin (0, 0, 0)
+    Plots the length (aka distance from the origin (0, 0, 0)) of the proton indicator
 
     :param proton_coords: ( Nx3, Array-like)
         Coords of the proton over time
@@ -163,12 +189,105 @@ def plot_data(proton_coords, step=1):
 
     # Add Data
     xs = [x for x in range(0, len(proton_coords), step)]
-    y_p = [distance([0, 0, 0], proton_coords[x]) for x in range(0, len(proton_coords), step)]
+    y_p = [np.dot(np.asarray([0, 0, 0]) - proton_coords[x], np.asarray([0, 0, 0]) - proton_coords[x])
+           for x in range(0, len(proton_coords), step)]
     ax.scatter(xs, y_p, color='y', label='Proton Indicator')
 
     # Show plot
     ax.legend()
     plt.show()
+
+
+def find_proton_indicator(data, donor_coords):
+    possible_acceptors = find_possible_acceptors(data, donor_coords)
+    #  print(f'Possible accept: {possible_acceptors}')
+    #  print(f'Donor Coords {donor_coords}')
+
+    # If there are no possible acceptors within given R_LIST, the proton indicator is at the donor
+    if possible_acceptors is None:
+        return donor_coords, donor_coords
+
+    hydrogen_bonded_to_donor = find_hydrogen_bonded_to_donor(data, donor_coords)
+    #  print(f'Hydo bonded: {hydrogen_bonded_to_donor}')
+    norm_factor = normalization_factor(possible_acceptors, hydrogen_bonded_to_donor, donor_coords)
+    #  print(f'Norm Factor {norm_factor}')
+
+    x_donor = donor_coords.copy()
+    summation = 0
+    for j in possible_acceptors:
+        for m in hydrogen_bonded_to_donor:
+            summation += weight_function(projected_donor_acceptor_ratio(j, m, donor_coords)) * j
+    result = (x_donor + summation) / norm_factor
+    #  print('r', result)
+    #  input()
+    return result, donor_coords
+
+
+def find_hydrogen_bonded_to_donor(data, donor_coords):
+    hydrogen = []
+    for hy in data.hydrogen:
+        if np.dot(hy - donor_coords, hy - donor_coords) < CUT_OFF_DISTANCE_O_H:
+            hydrogen.append(hy)
+    return hydrogen
+
+
+def find_possible_acceptors(data, donor_coords):
+    poss_acceptors = []
+    for ox in data.oxygen:
+        dist = np.dot(ox - donor_coords, ox - donor_coords)
+        if dist <= R_LIST and dist != 0:
+            poss_acceptors.append(ox)
+
+    for n in data.nitrogen:
+        dist = np.dot(n - donor_coords, n - donor_coords)
+        if dist < R_LIST and dist != 0:
+            poss_acceptors.append(n)
+
+    return poss_acceptors
+
+
+def weight_function(x):
+    """
+    g(x)
+    Determines the weight of x depending on its value
+    :param x: (float)
+    :return: (float)
+    """
+    if x >= 1:
+        return 0
+    elif x < 0:
+        return 1
+    else:  # 0 <= x < 1
+        return -6 * pow(x, 5) + 15 * pow(x, 4) - 10 * pow(x, 3) + 1
+
+
+def normalization_factor(js, ms, donor_coords):
+    """
+    The normalization factor
+    :return: (float)
+    """
+    g = 1
+    for j in js:
+        for m in ms:
+            g += weight_function(projected_donor_acceptor_ratio(j, m, donor_coords))
+    return g
+
+
+def projected_donor_acceptor_ratio(j, m, donor_coords):
+    """
+    AKA Pjm from paper
+    :param j: vector
+        possible acceptor vector
+    :param m: vector
+        hydrogen vector
+    :param donor_coords: vector
+        Coords of donor atom
+    :return: float
+        Donor-Acceptor ratio
+    """
+    numerator = np.dot((m - donor_coords), (j - donor_coords))
+    denominator = np.dot(j - donor_coords, j - donor_coords) ** 2
+    return numerator/denominator
 
 
 if __name__ == '__main__':

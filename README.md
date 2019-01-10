@@ -1,7 +1,24 @@
 # ProtonTransfer
 
-This program find the Hydrogen that acts as a proton transfer in an .xyz file
+This is a command line tool that creates a novel proton indicator from a coordinate file (.xyz) to highlight proton movement in acid/base chemical reactions. Appends the indicator to the data then creates a new coordinate file. Commonly used in complex organic chemistry and water wire studies.
 
-It then graphs the distance of The Proton from the origin (0, 0, 0) 
 
-A new .xyz file is then created where each step has a 'p+' added at the bottom as a proton indicator. 
+Arguments:
+* -i file name
+  * The name of the data to be analyzed
+* -g Boolean
+  * Optional argument to display a graph of the Indicators distance from the origin
+
+
+
+Examples: 
+
+    c:\...\data>python ProtonTransfer.py -i filename -g True
+    c:\...\data>python ProtonTransfer.py -i filename
+    
+    
+    
+ Citations:
+ 
+ * Formula to determine position of Proton Indicator from:
+    * Pezeshki, Soroosh, and Hai Lin. “Adaptive-Partitioning QM/MM for Molecular Dynamics Simulations: 4. Proton Hopping in Bulk Water.” https://pubs.acs.org/doi/abs/10.1021/ct501019y. 

@@ -9,7 +9,7 @@ CUT_OFF_DISTANCE_O_H = 1.005  # must be in 1 ≤ r ≤ 1.2, but the closer to 1 
 CUT_OFF_DISTANCE_N_H = 1.000  # UNK TODO: Find range
 R_LIST = 2.60                 # From paper, see citations #TODO: Add Citations
 """
-Cut off distance for H - O bonding and H - N bonding respectively 
+Cut off np.linalg.norm for H - O bonding and H - N bonding respectively 
 experimental found by looking at the graph (-g command line arg) with minimal to no outliers
 """
 
@@ -82,13 +82,13 @@ def main():
 def find_lone_hydrogen(data):
     for h in data.hydrogen:
         for ox in data.oxygen:
-            if distance(h, ox) <= CUT_OFF_DISTANCE_O_H:
+            if np.dot(h - ox, h - ox) <= CUT_OFF_DISTANCE_O_H:
                 break
         else:
             return h
     for h in data.hydrogen:
         for n in data.nitrogen:
-            if distance(h, n) <= CUT_OFF_DISTANCE_N_H:
+            if np.dot(h - n, h - ox) <= CUT_OFF_DISTANCE_N_H:
                 break
         else:
             return h
@@ -97,23 +97,17 @@ def find_lone_hydrogen(data):
 def find_donor(data):
 
     # test Oxygen first
+
     for ox in data.oxygen:
-        num_hy = 0
-        for hy in data.hydrogen:
-            if distance(ox, hy) < CUT_OFF_DISTANCE_O_H:  # From global
-                num_hy += 1
+        num_hy = len([1 for h in data.hydrogen if np.dot(ox - h, ox - h) < CUT_OFF_DISTANCE_O_H])
         if num_hy == 3:
             return ox
 
     # Test Nitrogen
     for n in data.nitrogen:
-        num_hy = 0
-        for hy in data.hydrogen:
-            if distance(n, hy) < CUT_OFF_DISTANCE_N_H: # From global
-                num_hy += 1
+        num_hy = len([1 for h in data.hydrogen if np.dot(n - h, n - h) < CUT_OFF_DISTANCE_N_H])
         if num_hy == 4:
             return n
-
     # No atoms had a spare hydrogen to donate
     return None
 
@@ -182,7 +176,7 @@ def write_data(data, out_file, proton_coord):
 
 def plot_data(proton_coords, step=1):
     """
-    Plots distance of the proton indicator from the origin (0, 0, 0)
+    Plots the length (aka distance from the origin (0, 0, 0)) of the proton indicator
 
     :param proton_coords: ( Nx3, Array-like)
         Coords of the proton over time
@@ -195,33 +189,13 @@ def plot_data(proton_coords, step=1):
 
     # Add Data
     xs = [x for x in range(0, len(proton_coords), step)]
-    y_p = [distance([0, 0, 0], proton_coords[x]) for x in range(0, len(proton_coords), step)]
+    y_p = [np.dot(np.asarray([0, 0, 0]) - proton_coords[x], np.asarray([0, 0, 0]) - proton_coords[x])
+           for x in range(0, len(proton_coords), step)]
     ax.scatter(xs, y_p, color='y', label='Proton Indicator')
 
     # Show plot
     ax.legend()
     plt.show()
-
-
-def distance(cord_1, cord_2):
-    """
-    Calculates the Euclidean distance between two points.
-        Points must have the same dimensions
-    :param cord_1: (Array-like, numeric)
-        Coords of First Point
-    :param cord_2: (Array-like, numeric)
-        Coords of Second Point
-    :return: (float)
-        Distance between the two points
-    Examples:
-        distance([0], [5])) --> 5
-        distance([0, 0, 0, 0], [5, 5, 5, 5]) --> 10
-    """
-    if len(cord_1) == len(cord_2):
-        sum_squares = 0
-        for i, j in zip(cord_1, cord_2):
-            sum_squares += pow(i - j, 2)
-        return np.sqrt(sum_squares)
 
 
 def find_proton_indicator(data, donor_coords):
@@ -252,7 +226,7 @@ def find_proton_indicator(data, donor_coords):
 def find_hydrogen_bonded_to_donor(data, donor_coords):
     hydrogen = []
     for hy in data.hydrogen:
-        if distance(hy, donor_coords) < CUT_OFF_DISTANCE_O_H:
+        if np.dot(hy - donor_coords, hy - donor_coords) < CUT_OFF_DISTANCE_O_H:
             hydrogen.append(hy)
     return hydrogen
 
@@ -260,12 +234,12 @@ def find_hydrogen_bonded_to_donor(data, donor_coords):
 def find_possible_acceptors(data, donor_coords):
     poss_acceptors = []
     for ox in data.oxygen:
-        dist = distance(ox, donor_coords)
+        dist = np.dot(ox - donor_coords, ox - donor_coords)
         if dist <= R_LIST and dist != 0:
             poss_acceptors.append(ox)
 
     for n in data.nitrogen:
-        dist = distance(n, donor_coords)
+        dist = np.dot(n - donor_coords, n - donor_coords)
         if dist < R_LIST and dist != 0:
             poss_acceptors.append(n)
 
@@ -312,7 +286,7 @@ def projected_donor_acceptor_ratio(j, m, donor_coords):
         Donor-Acceptor ratio
     """
     numerator = np.dot((m - donor_coords), (j - donor_coords))
-    denominator = np.linalg.norm(j - donor_coords) ** 2
+    denominator = np.dot(j - donor_coords, j - donor_coords) ** 2
     return numerator/denominator
 
 

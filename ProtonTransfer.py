@@ -36,7 +36,6 @@ def get_args(args=None):
 def main():
     """
      - Reads In a .xyz file
-     - Creates an Atom object for each atom in Step
      - Calculates which atom is acting as the proton transfer
      - adds a proton indicator and writes each step to an out_file
     """
@@ -80,6 +79,15 @@ def main():
 
 
 def find_lone_hydrogen(data):
+    """
+    Finds a hydrogen that is not bound to any oxygen or nitrogen atoms, if one exists
+
+    :param data: Named tuple (oxygen, nitrogen, hydrogen, other_atoms)
+        Data containing atom coordinate and sorted by atom type
+
+    :return: vector
+        coordinates of the un-bonded hydrogen
+    """
     for h in data.hydrogen:
         for ox in data.oxygen:
             if np.dot(h - ox, h - ox) <= CUT_OFF_DISTANCE_O_H:
@@ -95,9 +103,17 @@ def find_lone_hydrogen(data):
 
 
 def find_donor(data):
+    """
+    Finds the donor atom based on number of hydrogen bonded to it
+
+    :param data: Named tuple (oxygen, nitrogen, hydrogen, other_atoms)
+        Data containing atom coordinate and sorted by atom type
+
+    :return: vector
+        coordinates of donor atom
+    """
 
     # test Oxygen first
-
     for ox in data.oxygen:
         num_hy = len([1 for h in data.hydrogen if np.dot(ox - h, ox - h) < CUT_OFF_DISTANCE_O_H])
         if num_hy == 3:
@@ -108,6 +124,7 @@ def find_donor(data):
         num_hy = len([1 for h in data.hydrogen if np.dot(n - h, n - h) < CUT_OFF_DISTANCE_N_H])
         if num_hy == 4:
             return n
+
     # No atoms had a spare hydrogen to donate
     return None
 
@@ -115,17 +132,12 @@ def find_donor(data):
 def sort_atoms(step):
     """
     sort atoms into atom_types
-    :param step: namedtuple
-        fields:
-            atom_types: atom names
-            coords: atom coords
-            title: step title (not used)
-    :return: namedtuple
-        fields:
-            hydrogen
-            oxygen
-            nitrogen
-            other_atoms
+
+    :param step: namedtuple (atom_types, coords, title)
+        the raw data from the .xyz file that was read in
+
+    :return: namedtuple (oxygen, nitrogen, hydrogen, other_atoms)
+        Data containing atom coordinate and sorted by atom type
     """
     hydrogen = []
     oxygen = []
@@ -147,13 +159,13 @@ def sort_atoms(step):
 
 def write_data(data, out_file, proton_coord):
     """
-    Formats data to pass into write_xyz
+    Formats data to pass into xyz.write_xyz
 
-    :param data: (namedtuple)
+    :param data: namedtuple (atom_types, coords, title)
         Data to be added to
-    :param out_file: (File Pointer)
+    :param out_file: file pointer
         File to be written to
-    :param proton_coord: (1x3 Array-Like)
+    :param proton_coord: vector
         Coordinate of proton indicator to add
     """
     # Format out_coords
@@ -176,11 +188,11 @@ def write_data(data, out_file, proton_coord):
 
 def plot_data(proton_coords, step=1):
     """
-    Plots the length (aka distance from the origin (0, 0, 0)) of the proton indicator
+    Plots the distance from the origin (0, 0, 0) of the proton indicator
 
-    :param proton_coords: ( Nx3, Array-like)
+    :param proton_coords: list of vectors
         Coords of the proton over time
-    :param step: (int) (Default=1)
+    :param step: int (Default=1)
         Number of steps between points, lower numbers will have more accuracy, Minimum step is one
     """
     # Set up plot
@@ -199,18 +211,25 @@ def plot_data(proton_coords, step=1):
 
 
 def find_proton_indicator(data, donor_coords):
+    """
+    Work function that calcuates the coordinates of a proton indicator based off of the coordinates of all other atoms.
+
+    :param data: Named tuple (oxygen, nitrogen, hydrogen, other_atoms)
+        Data containing atom coordinate and sorted by atom type
+    :param donor_coords: vector
+        Coordinate of the donor atom
+
+    :return: vector
+        Coordinates of the proton indicator
+    """
     possible_acceptors = find_possible_acceptors(data, donor_coords)
-    #  print(f'Possible accept: {possible_acceptors}')
-    #  print(f'Donor Coords {donor_coords}')
 
     # If there are no possible acceptors within given R_LIST, the proton indicator is at the donor
     if possible_acceptors is None:
         return donor_coords, donor_coords
 
     hydrogen_bonded_to_donor = find_hydrogen_bonded_to_donor(data, donor_coords)
-    #  print(f'Hydo bonded: {hydrogen_bonded_to_donor}')
     norm_factor = normalization_factor(possible_acceptors, hydrogen_bonded_to_donor, donor_coords)
-    #  print(f'Norm Factor {norm_factor}')
 
     x_donor = donor_coords.copy()
     summation = 0
@@ -218,12 +237,21 @@ def find_proton_indicator(data, donor_coords):
         for m in hydrogen_bonded_to_donor:
             summation += weight_function(projected_donor_acceptor_ratio(j, m, donor_coords)) * j
     result = (x_donor + summation) / norm_factor
-    #  print('r', result)
-    #  input()
     return result, donor_coords
 
 
 def find_hydrogen_bonded_to_donor(data, donor_coords):
+    """
+    Finds all hydrogen atoms currently bonded to the donor atom based off distance
+
+    :param data: Named tuple (oxygen, nitrogen, hydrogen, other_atoms)
+        Data containing atom coordinate and sorted by atom type
+    :param donor_coords: vector
+        Coordinate of the donor atom
+
+    :return: list
+        a list containing the coordinates of all hydrogen atoms bonded to the donor
+    """
     hydrogen = []
     for hy in data.hydrogen:
         if np.dot(hy - donor_coords, hy - donor_coords) < CUT_OFF_DISTANCE_O_H:
@@ -232,6 +260,17 @@ def find_hydrogen_bonded_to_donor(data, donor_coords):
 
 
 def find_possible_acceptors(data, donor_coords):
+    """
+    Finds possible Oxygen and Nitrogen atoms that could accept the proton based on distance from the donor coords
+
+    :param data: Named tuple (oxygen, nitrogen, hydrogen, other_atoms)
+        Data containing atom coordinate and sorted by atom type
+    :param donor_coords: vector
+        Coordinate of the donor atom
+
+    :return: list
+        a list containing the coordinate of possible acceptors
+    """
     poss_acceptors = []
     for ox in data.oxygen:
         dist = np.dot(ox - donor_coords, ox - donor_coords)
@@ -248,10 +287,19 @@ def find_possible_acceptors(data, donor_coords):
 
 def weight_function(x):
     """
-    g(x)
-    Determines the weight of x depending on its value
-    :param x: (float)
-    :return: (float)
+    A stepped, 5th order polynomial dependant on x that determines the weight of x.
+    X is the projected_donor_acceptor_ratio.
+
+    :param x: float
+        projected_donor_acceptor_ratio for some J, M
+
+    :return: float
+        When x ≥ 1:
+            :returns: 0
+        When 0 ≤ x < 1:
+            :returns: A stepped, 5th order polynomial dependant on x
+        When x < 0:
+            :returns: 1
     """
     if x >= 1:
         return 0
@@ -264,7 +312,16 @@ def weight_function(x):
 def normalization_factor(js, ms, donor_coords):
     """
     The normalization factor
-    :return: (float)
+
+    :param js: iterator of vectors
+        An iterator of possible acceptor vectors
+    :param ms: iterator of vectors
+        An iterator of hydrogen vectors
+    :param donor_coords: vector
+        coordinates of the donor atom
+
+    :return: float
+        Normalization factor
     """
     g = 1
     for j in js:
@@ -275,18 +332,20 @@ def normalization_factor(js, ms, donor_coords):
 
 def projected_donor_acceptor_ratio(j, m, donor_coords):
     """
-    AKA Pjm from paper
+    Calculates a ratio indicating how close the hydrogen (m) is to the donor (donor coords) vs a possible acceptor (j).
+
     :param j: vector
         possible acceptor vector
     :param m: vector
         hydrogen vector
     :param donor_coords: vector
         Coords of donor atom
+
     :return: float
         Donor-Acceptor ratio
     """
     numerator = np.dot((m - donor_coords), (j - donor_coords))
-    denominator = np.dot(j - donor_coords, j - donor_coords) ** 2
+    denominator = np.dot(abs(j - donor_coords), abs((j - donor_coords)))
     return numerator/denominator
 
 

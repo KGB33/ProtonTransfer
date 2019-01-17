@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module xyz</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>xyz</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:xyz.py">xyz.py</a></font></td></tr></table>
+    <p><tt>From&nbsp;https://github.com/pele-python/pele/blob/master/pele/utils/xyz.py<br>
+Thanks&nbsp;js850&nbsp;!<br>
+&nbsp;<br>
+Changes&nbsp;from&nbsp;js850's&nbsp;Version:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Updated&nbsp;to&nbsp;python&nbsp;3.7<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Renamed&nbsp;atomtypes&nbsp;to&nbsp;atom_types<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Added&nbsp;EOF&nbsp;detector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;formatted&nbsp;output<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;turned&nbsp;read_xyz&nbsp;into&nbsp;a&nbsp;generator&nbsp;function</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-read_xyz"><strong>read_xyz</strong></a>(in_file)</dt><dd><tt>reads&nbsp;a&nbsp;xyz&nbsp;file&nbsp;from&nbsp;file&nbsp;name&nbsp;and&nbsp;yields&nbsp;data&nbsp;step&nbsp;by&nbsp;step<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+in_file&nbsp;:&nbsp;file&nbsp;name<br>
+&nbsp;&nbsp;&nbsp;&nbsp;file&nbsp;to&nbsp;read&nbsp;from<br>
+&nbsp;<br>
+Yields<br>
+-------<br>
+xyz&nbsp;:&nbsp;namedtuple<br>
+&nbsp;&nbsp;&nbsp;&nbsp;returns&nbsp;a&nbsp;named&nbsp;tuple&nbsp;with&nbsp;coords,&nbsp;title&nbsp;and&nbsp;list&nbsp;of&nbsp;atom_types.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+write_xyz</tt></dd></dl>
+ <dl><dt><a name="-write_xyz"><strong>write_xyz</strong></a>(file_out, coords, title='', atom_types=('A',))</dt><dd><tt>write&nbsp;a&nbsp;xyz&nbsp;file&nbsp;from&nbsp;file&nbsp;handle<br>
+&nbsp;<br>
+Writes&nbsp;coordinates&nbsp;in&nbsp;xyz&nbsp;format.&nbsp;It&nbsp;uses&nbsp;atom_types&nbsp;as&nbsp;names.&nbsp;The&nbsp;list&nbsp;is<br>
+cycled&nbsp;if&nbsp;it&nbsp;contains&nbsp;less&nbsp;entries&nbsp;than&nbsp;there&nbsp;are&nbsp;coordinates,<br>
+&nbsp;<br>
+One&nbsp;can&nbsp;also&nbsp;directly&nbsp;write&nbsp;xyz&nbsp;data&nbsp;which&nbsp;was&nbsp;generated&nbsp;with&nbsp;read_xyz.<br>
+&nbsp;<br>
+#&nbsp;&gt;&gt;&gt;&nbsp;xx&nbsp;=&nbsp;<a href="#-read_xyz">read_xyz</a>("in.xyz")<br>
+#&nbsp;&gt;&gt;&gt;&nbsp;<a href="#-write_xyz">write_xyz</a>(open("out.xyz",&nbsp;"w"),&nbsp;*xx)<br>
+&nbsp;<br>
+Parameters<br>
+----------<br>
+file_out&nbsp;:&nbsp;an&nbsp;open&nbsp;file<br>
+coords&nbsp;:&nbsp;np.array<br>
+&nbsp;&nbsp;&nbsp;&nbsp;array&nbsp;of&nbsp;coordinates<br>
+title&nbsp;:&nbsp;title&nbsp;section,&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;for&nbsp;xyz&nbsp;file<br>
+atom_types&nbsp;:&nbsp;iterable<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;of&nbsp;atom_types.<br>
+&nbsp;<br>
+See&nbsp;Also<br>
+--------<br>
+read_xyz</tt></dd></dl>
+</td></tr></table>
+</body></html>

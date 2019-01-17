@@ -1,3 +1,9 @@
+"""
+This is a command line tool that creates a novel proton indicator from a coordinate file (.xyz)
+to highlight proton movement in acid/base chemical reactions.
+Appends the indicator to the data then creates a new coordinate file.
+Commonly used in complex organic chemistry and water wire studies.
+"""
 from xyz import read_xyz, write_xyz
 import matplotlib.pyplot as plt
 import numpy as np

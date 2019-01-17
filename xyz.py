@@ -2,7 +2,7 @@
 From https://github.com/pele-python/pele/blob/master/pele/utils/xyz.py
 Thanks js850 !
 
-Changes:
+Changes from js850's Version:
     - Updated to python 3.7
     - Renamed atomtypes to atom_types
     - Added EOF detector
@@ -23,8 +23,6 @@ tools for reading from and writing to .xyz files
 import numpy as np
 from itertools import cycle
 from collections import namedtuple
-
-__all__ = ["read_xyz", "write_xyz"]
 
 
 def read_xyz(in_file):

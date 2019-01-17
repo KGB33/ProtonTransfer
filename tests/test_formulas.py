@@ -1,5 +1,5 @@
 import unittest
-from ProtonTransfer import weight_function, distance, projected_donor_acceptor_ratio, normalization_factor
+from ProtonTransfer import weight_function, projected_donor_acceptor_ratio, normalization_factor
 import numpy as np
 
 
@@ -24,6 +24,7 @@ class TestWeightFunction(unittest.TestCase):
     def test_x_one_third(self):
         result = weight_function(1/3)
         expected = 0.7901234568
+        self.assertAlmostEqual(expected, result)
 
     def test_x_random_floats(self):
         x1, x2, x3 = 0.4666923675, 0.7422350280, 0.7462493491
@@ -32,18 +33,6 @@ class TestWeightFunction(unittest.TestCase):
         self.assertAlmostEqual(e1, r1, places=6)
         self.assertAlmostEqual(e2, r2, places=6)
         self.assertAlmostEqual(e3, r3, places=6)
-
-
-class TestDistance(unittest.TestCase):
-
-    def test_one_dimensional_input(self):
-        self.assertEqual(5, distance([0], [5]))
-
-    def test_really_big_dimensional_input(self):
-        self.assertEqual(500, distance([0 for _ in range(0, 10000)], [5 for _ in range(0, 10000)]))
-
-    def test_negative_coords(self):
-        self.assertEqual(500, distance([0 for _ in range(0, 10000)], [-5 for _ in range(0, 10000)]))
 
 
 class TestProjectedDonorAcceptorRatio(unittest.TestCase):

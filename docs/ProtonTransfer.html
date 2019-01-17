@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module ProtonTransfer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>ProtonTransfer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:protontransfer.py">protontransfer.py</a></font></td></tr></table>
+    <p><tt>This&nbsp;is&nbsp;a&nbsp;command&nbsp;line&nbsp;tool&nbsp;that&nbsp;creates&nbsp;a&nbsp;novel&nbsp;proton&nbsp;indicator&nbsp;from&nbsp;a&nbsp;coordinate&nbsp;file&nbsp;(.xyz)<br>
+to&nbsp;highlight&nbsp;proton&nbsp;movement&nbsp;in&nbsp;acid/base&nbsp;chemical&nbsp;reactions.<br>
+Appends&nbsp;the&nbsp;indicator&nbsp;to&nbsp;the&nbsp;data&nbsp;then&nbsp;creates&nbsp;a&nbsp;new&nbsp;coordinate&nbsp;file.<br>
+Commonly&nbsp;used&nbsp;in&nbsp;complex&nbsp;organic&nbsp;chemistry&nbsp;and&nbsp;water&nbsp;wire&nbsp;studies.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-find_donor"><strong>find_donor</strong></a>(data)</dt><dd><tt>Finds&nbsp;the&nbsp;donor&nbsp;atom&nbsp;based&nbsp;on&nbsp;number&nbsp;of&nbsp;hydrogen&nbsp;bonded&nbsp;to&nbsp;it<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;Named&nbsp;tuple&nbsp;(oxygen,&nbsp;nitrogen,&nbsp;hydrogen,&nbsp;other_atoms)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;containing&nbsp;atom&nbsp;coordinate&nbsp;and&nbsp;sorted&nbsp;by&nbsp;atom&nbsp;type<br>
+&nbsp;<br>
+:return:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;coordinates&nbsp;of&nbsp;donor&nbsp;atom</tt></dd></dl>
+ <dl><dt><a name="-find_hydrogen_bonded_to_donor"><strong>find_hydrogen_bonded_to_donor</strong></a>(data, donor_coords)</dt><dd><tt>Finds&nbsp;all&nbsp;hydrogen&nbsp;atoms&nbsp;currently&nbsp;bonded&nbsp;to&nbsp;the&nbsp;donor&nbsp;atom&nbsp;based&nbsp;off&nbsp;distance<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;Named&nbsp;tuple&nbsp;(oxygen,&nbsp;nitrogen,&nbsp;hydrogen,&nbsp;other_atoms)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;containing&nbsp;atom&nbsp;coordinate&nbsp;and&nbsp;sorted&nbsp;by&nbsp;atom&nbsp;type<br>
+:param&nbsp;donor_coords:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Coordinate&nbsp;of&nbsp;the&nbsp;donor&nbsp;atom<br>
+&nbsp;<br>
+:return:&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;list&nbsp;containing&nbsp;the&nbsp;coordinates&nbsp;of&nbsp;all&nbsp;hydrogen&nbsp;atoms&nbsp;bonded&nbsp;to&nbsp;the&nbsp;donor</tt></dd></dl>
+ <dl><dt><a name="-find_lone_hydrogen"><strong>find_lone_hydrogen</strong></a>(data)</dt><dd><tt>Finds&nbsp;a&nbsp;hydrogen&nbsp;that&nbsp;is&nbsp;not&nbsp;bound&nbsp;to&nbsp;any&nbsp;oxygen&nbsp;or&nbsp;nitrogen&nbsp;atoms,&nbsp;if&nbsp;one&nbsp;exists<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;Named&nbsp;tuple&nbsp;(oxygen,&nbsp;nitrogen,&nbsp;hydrogen,&nbsp;other_atoms)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;containing&nbsp;atom&nbsp;coordinate&nbsp;and&nbsp;sorted&nbsp;by&nbsp;atom&nbsp;type<br>
+&nbsp;<br>
+:return:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;un-bonded&nbsp;hydrogen</tt></dd></dl>
+ <dl><dt><a name="-find_possible_acceptors"><strong>find_possible_acceptors</strong></a>(data, donor_coords)</dt><dd><tt>Finds&nbsp;possible&nbsp;Oxygen&nbsp;and&nbsp;Nitrogen&nbsp;atoms&nbsp;that&nbsp;could&nbsp;accept&nbsp;the&nbsp;proton&nbsp;based&nbsp;on&nbsp;distance&nbsp;from&nbsp;the&nbsp;donor&nbsp;coords<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;Named&nbsp;tuple&nbsp;(oxygen,&nbsp;nitrogen,&nbsp;hydrogen,&nbsp;other_atoms)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;containing&nbsp;atom&nbsp;coordinate&nbsp;and&nbsp;sorted&nbsp;by&nbsp;atom&nbsp;type<br>
+:param&nbsp;donor_coords:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Coordinate&nbsp;of&nbsp;the&nbsp;donor&nbsp;atom<br>
+&nbsp;<br>
+:return:&nbsp;list<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;list&nbsp;containing&nbsp;the&nbsp;coordinate&nbsp;of&nbsp;possible&nbsp;acceptors</tt></dd></dl>
+ <dl><dt><a name="-find_proton_indicator"><strong>find_proton_indicator</strong></a>(data, donor_coords)</dt><dd><tt>Work&nbsp;function&nbsp;that&nbsp;calcuates&nbsp;the&nbsp;coordinates&nbsp;of&nbsp;a&nbsp;proton&nbsp;indicator&nbsp;based&nbsp;off&nbsp;of&nbsp;the&nbsp;coordinates&nbsp;of&nbsp;all&nbsp;other&nbsp;atoms.<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;Named&nbsp;tuple&nbsp;(oxygen,&nbsp;nitrogen,&nbsp;hydrogen,&nbsp;other_atoms)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;containing&nbsp;atom&nbsp;coordinate&nbsp;and&nbsp;sorted&nbsp;by&nbsp;atom&nbsp;type<br>
+:param&nbsp;donor_coords:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Coordinate&nbsp;of&nbsp;the&nbsp;donor&nbsp;atom<br>
+&nbsp;<br>
+:return:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Coordinates&nbsp;of&nbsp;the&nbsp;proton&nbsp;indicator</tt></dd></dl>
+ <dl><dt><a name="-get_args"><strong>get_args</strong></a>(args=None)</dt><dd><tt>Default&nbsp;Function&nbsp;to&nbsp;parse&nbsp;command&nbsp;line&nbsp;arguments</tt></dd></dl>
+ <dl><dt><a name="-main"><strong>main</strong></a>()</dt><dd><tt>-&nbsp;Reads&nbsp;In&nbsp;a&nbsp;.xyz&nbsp;file<br>
+-&nbsp;Calculates&nbsp;which&nbsp;atom&nbsp;is&nbsp;acting&nbsp;as&nbsp;the&nbsp;proton&nbsp;transfer<br>
+-&nbsp;adds&nbsp;a&nbsp;proton&nbsp;indicator&nbsp;and&nbsp;writes&nbsp;each&nbsp;step&nbsp;to&nbsp;an&nbsp;out_file</tt></dd></dl>
+ <dl><dt><a name="-normalization_factor"><strong>normalization_factor</strong></a>(js, ms, donor_coords)</dt><dd><tt>The&nbsp;normalization&nbsp;factor<br>
+&nbsp;<br>
+:param&nbsp;js:&nbsp;iterator&nbsp;of&nbsp;vectors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;iterator&nbsp;of&nbsp;possible&nbsp;acceptor&nbsp;vectors<br>
+:param&nbsp;ms:&nbsp;iterator&nbsp;of&nbsp;vectors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;iterator&nbsp;of&nbsp;hydrogen&nbsp;vectors<br>
+:param&nbsp;donor_coords:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;coordinates&nbsp;of&nbsp;the&nbsp;donor&nbsp;atom<br>
+&nbsp;<br>
+:return:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Normalization&nbsp;factor</tt></dd></dl>
+ <dl><dt><a name="-plot_data"><strong>plot_data</strong></a>(proton_coords, step=1)</dt><dd><tt>Plots&nbsp;the&nbsp;distance&nbsp;from&nbsp;the&nbsp;origin&nbsp;(0,&nbsp;0,&nbsp;0)&nbsp;of&nbsp;the&nbsp;proton&nbsp;indicator<br>
+&nbsp;<br>
+:param&nbsp;proton_coords:&nbsp;list&nbsp;of&nbsp;vectors<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Coords&nbsp;of&nbsp;the&nbsp;proton&nbsp;over&nbsp;time<br>
+:param&nbsp;step:&nbsp;int&nbsp;(Default=1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Number&nbsp;of&nbsp;steps&nbsp;between&nbsp;points,&nbsp;lower&nbsp;numbers&nbsp;will&nbsp;have&nbsp;more&nbsp;accuracy,&nbsp;Minimum&nbsp;step&nbsp;is&nbsp;one</tt></dd></dl>
+ <dl><dt><a name="-projected_donor_acceptor_ratio"><strong>projected_donor_acceptor_ratio</strong></a>(j, m, donor_coords)</dt><dd><tt>Calculates&nbsp;a&nbsp;ratio&nbsp;indicating&nbsp;how&nbsp;close&nbsp;the&nbsp;hydrogen&nbsp;(m)&nbsp;is&nbsp;to&nbsp;the&nbsp;donor&nbsp;(donor&nbsp;coords)&nbsp;vs&nbsp;a&nbsp;possible&nbsp;acceptor&nbsp;(j).<br>
+&nbsp;<br>
+:param&nbsp;j:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;possible&nbsp;acceptor&nbsp;vector<br>
+:param&nbsp;m:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hydrogen&nbsp;vector<br>
+:param&nbsp;donor_coords:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Coords&nbsp;of&nbsp;donor&nbsp;atom<br>
+&nbsp;<br>
+:return:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Donor-Acceptor&nbsp;ratio</tt></dd></dl>
+ <dl><dt><a name="-sort_atoms"><strong>sort_atoms</strong></a>(step)</dt><dd><tt>sort&nbsp;atoms&nbsp;into&nbsp;atom_types<br>
+&nbsp;<br>
+:param&nbsp;step:&nbsp;namedtuple&nbsp;(atom_types,&nbsp;coords,&nbsp;title)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;raw&nbsp;data&nbsp;from&nbsp;the&nbsp;.xyz&nbsp;file&nbsp;that&nbsp;was&nbsp;read&nbsp;in<br>
+&nbsp;<br>
+:return:&nbsp;namedtuple&nbsp;(oxygen,&nbsp;nitrogen,&nbsp;hydrogen,&nbsp;other_atoms)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;containing&nbsp;atom&nbsp;coordinate&nbsp;and&nbsp;sorted&nbsp;by&nbsp;atom&nbsp;type</tt></dd></dl>
+ <dl><dt><a name="-weight_function"><strong>weight_function</strong></a>(x)</dt><dd><tt>A&nbsp;stepped,&nbsp;5th&nbsp;order&nbsp;polynomial&nbsp;dependant&nbsp;on&nbsp;x&nbsp;that&nbsp;determines&nbsp;the&nbsp;weight&nbsp;of&nbsp;x.<br>
+X&nbsp;is&nbsp;the&nbsp;projected_donor_acceptor_ratio.<br>
+&nbsp;<br>
+:param&nbsp;x:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;projected_donor_acceptor_ratio&nbsp;for&nbsp;some&nbsp;J,&nbsp;M<br>
+&nbsp;<br>
+:return:&nbsp;float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;x&nbsp;≥&nbsp;1:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;0&nbsp;≤&nbsp;x&nbsp;&lt;&nbsp;1:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;A&nbsp;stepped,&nbsp;5th&nbsp;order&nbsp;polynomial&nbsp;dependant&nbsp;on&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;When&nbsp;x&nbsp;&lt;&nbsp;0:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:returns:&nbsp;1</tt></dd></dl>
+ <dl><dt><a name="-write_data"><strong>write_data</strong></a>(data, out_file, proton_coord)</dt><dd><tt>Formats&nbsp;data&nbsp;to&nbsp;pass&nbsp;into&nbsp;xyz.write_xyz<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;namedtuple&nbsp;(atom_types,&nbsp;coords,&nbsp;title)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Data&nbsp;to&nbsp;be&nbsp;added&nbsp;to<br>
+:param&nbsp;out_file:&nbsp;file&nbsp;pointer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;File&nbsp;to&nbsp;be&nbsp;written&nbsp;to<br>
+:param&nbsp;proton_coord:&nbsp;vector<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Coordinate&nbsp;of&nbsp;proton&nbsp;indicator&nbsp;to&nbsp;add</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>CUT_OFF_DISTANCE_N_H</strong> = 1.2<br>
+<strong>CUT_OFF_DISTANCE_O_H</strong> = 1.005<br>
+<strong>R_LIST</strong> = 2.6</td></tr></table>
+</body></html>

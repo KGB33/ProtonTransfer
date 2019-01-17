@@ -1,5 +1,8 @@
 # ProtonTransfer
 
+######    _Developed By Kelton Bassingthwaite_
+
+
 This is a command line tool that creates a novel proton indicator from a coordinate file (.xyz) to highlight proton movement in acid/base chemical reactions. It then appends the indicator to the data then creates a new coordinate file. This data is commonly used in complex organic chemistry and water wire studies.
 
 

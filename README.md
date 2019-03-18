@@ -22,9 +22,6 @@ This is a command line tool that creates a novel proton indicator from a coordin
     
 
 ## Requirements:
-* Pip install coming soon!
-
-Alternatively:
 * Python 3+
 * numpy
 * matplotlib

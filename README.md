@@ -26,7 +26,7 @@ This is a command line tool that creates a novel proton indicator from a coordin
 * numpy
 * matplotlib
 
- ## Citations:
+## Citations:
  
  * Formula to determine the position of Proton Indicator from:
     * Pezeshki, Soroosh, and Hai Lin. “Adaptive-Partitioning QM/MM for Molecular Dynamics Simulations: 4. Proton Hopping in Bulk Water.” https://pubs.acs.org/doi/abs/10.1021/ct501019y. 

@@ -12,8 +12,10 @@ from itertools import cycle
 
 # Constants!
 CUT_OFF_DISTANCE_O_H = 1.005  # must be in 1 ≤ r ≤ 1.2, but the closer to 1 the better
-CUT_OFF_DISTANCE_N_H = 1.200  # must be in 1.2 ≤ r ≤ 1.4 but the closer to 1.2 the better
-R_LIST = 2.60                 # From paper, see readme for citations
+CUT_OFF_DISTANCE_N_H = (
+    1.200
+)  # must be in 1.2 ≤ r ≤ 1.4 but the closer to 1.2 the better
+R_LIST = 2.60  # From paper, see readme for citations
 """
 Cut off distance for H - O bonding and H - N bonding respectively 
 experimental found by looking at the graph (-g command line arg) with minimal to no outliers
@@ -25,17 +27,14 @@ def get_args(args=None):
     """
     Default Function to parse command line arguments
     """
-    parser = ArgumentParser(description='See header of script')
+    parser = ArgumentParser(description="See header of script")
+    parser.add_argument("-i", "--infile_name", help="Input File Name", required=True)
     parser.add_argument(
-        '-i',
-        '--infile_name',
-        help='Input File Name',
-        required=True)
-    parser.add_argument(
-        '-g',
-        '--graph',
-        help='Graphs The dist of proton indicator from (0,0,0)',
-        required=False)
+        "-g",
+        "--graph",
+        help="Graphs The dist of proton indicator from (0,0,0)",
+        required=False,
+    )
     return parser.parse_args(args)
 
 
@@ -51,33 +50,33 @@ def main():
     """ File Name(s) """
     file_name = args.infile_name
     # In File Path
-    from_file_path = file_name + '.xyz'
+    from_file_path = file_name + ".xyz"
     # Out File Path
-    to_file_path = file_name + '_with_proton_indicator.xyz'
+    to_file_path = file_name + "_with_proton_indicator.xyz"
 
     # Instance Variables
     proton_coords = []  # only used for graphing
 
     # Read Files
     data_generator = read_xyz(from_file_path)
-    with open(to_file_path, 'w') as out_file:
+    with open(to_file_path, "w") as out_file:
         # Calculate Proton Indicator position for all steps
         # and change Donor if necessary
         for step in data_generator:
-                data = sort_atoms(step)
-                donor_coord = find_donor(data)
+            data = sort_atoms(step)
+            donor_coord = find_donor(data)
 
-                if donor_coord is None:
-                    proton_coord = find_lone_hydrogen(data)
-                else:
-                    # find Proton Indicator
-                    proton_coord, donor_coord = find_proton_indicator(data, donor_coord)
+            if donor_coord is None:
+                proton_coord = find_lone_hydrogen(data)
+            else:
+                # find Proton Indicator
+                proton_coord, donor_coord = find_proton_indicator(data, donor_coord)
 
-                if args.graph:
-                    proton_coords += [proton_coord, ]
+            if args.graph:
+                proton_coords += [proton_coord]
 
-                # Write Data
-                write_data(step, out_file, proton_coord)
+            # Write Data
+            write_data(step, out_file, proton_coord)
 
         # Plot Data
         if args.graph:
@@ -121,13 +120,17 @@ def find_donor(data):
 
     # test Oxygen first
     for ox in data.oxygen:
-        num_hy = len([1 for h in data.hydrogen if np.dot(ox - h, ox - h) < CUT_OFF_DISTANCE_O_H])
+        num_hy = len(
+            [1 for h in data.hydrogen if np.dot(ox - h, ox - h) < CUT_OFF_DISTANCE_O_H]
+        )
         if num_hy == 3:
             return ox
 
     # Test Nitrogen
     for n in data.nitrogen:
-        num_hy = len([1 for h in data.hydrogen if np.dot(n - h, n - h) < CUT_OFF_DISTANCE_N_H])
+        num_hy = len(
+            [1 for h in data.hydrogen if np.dot(n - h, n - h) < CUT_OFF_DISTANCE_N_H]
+        )
         if num_hy == 4:
             return n
 
@@ -150,17 +153,18 @@ def sort_atoms(step):
     nitrogen = []
     other_atoms = []
     for atom, coords in zip(step.atom_types, step.coords):
-        if atom == 'O':
+        if atom == "O":
             oxygen.append(coords)
-        elif atom == 'N':
+        elif atom == "N":
             nitrogen.append(coords)
-        elif atom == 'H':
+        elif atom == "H":
             hydrogen.append(coords)
         else:
             other_atoms.append(coords)
-            
-    return namedtuple('SortedAtomCoords', ['hydrogen', 'oxygen', 'nitrogen', 'other_atoms']
-                      )(hydrogen, oxygen, nitrogen, other_atoms)
+
+    return namedtuple(
+        "SortedAtomCoords", ["hydrogen", "oxygen", "nitrogen", "other_atoms"]
+    )(hydrogen, oxygen, nitrogen, other_atoms)
 
 
 def write_data(data, out_file, proton_coord):
@@ -183,7 +187,7 @@ def write_data(data, out_file, proton_coord):
     # print(out_coords)
 
     # Format out_atom_types
-    out_atom_types = data.atom_types + ['DUM']
+    out_atom_types = data.atom_types + ["DUM"]
 
     # Format out_title
     out_title = data.title
@@ -207,9 +211,14 @@ def plot_data(proton_coords, step=1):
 
     # Add Data
     xs = [x for x in range(0, len(proton_coords), step)]
-    y_p = [np.dot(np.asarray([0, 0, 0]) - proton_coords[x], np.asarray([0, 0, 0]) - proton_coords[x])
-           for x in range(0, len(proton_coords), step)]
-    ax.scatter(xs, y_p, color='y', label='Proton Indicator')
+    y_p = [
+        np.dot(
+            np.asarray([0, 0, 0]) - proton_coords[x],
+            np.asarray([0, 0, 0]) - proton_coords[x],
+        )
+        for x in range(0, len(proton_coords), step)
+    ]
+    ax.scatter(xs, y_p, color="y", label="Proton Indicator")
 
     # Show plot
     ax.legend()
@@ -235,13 +244,17 @@ def find_proton_indicator(data, donor_coords):
         return donor_coords, donor_coords
 
     hydrogen_bonded_to_donor = find_hydrogen_bonded_to_donor(data, donor_coords)
-    norm_factor = normalization_factor(possible_acceptors, hydrogen_bonded_to_donor, donor_coords)
+    norm_factor = normalization_factor(
+        possible_acceptors, hydrogen_bonded_to_donor, donor_coords
+    )
 
     x_donor = donor_coords.copy()
     summation = 0
     for j in possible_acceptors:
         for m in hydrogen_bonded_to_donor:
-            summation += weight_function(projected_donor_acceptor_ratio(j, m, donor_coords)) * j
+            summation += (
+                weight_function(projected_donor_acceptor_ratio(j, m, donor_coords)) * j
+            )
     result = (x_donor + summation) / norm_factor
     return result, donor_coords
 
@@ -352,7 +365,7 @@ def projected_donor_acceptor_ratio(j, m, donor_coords):
     """
     numerator = np.dot((m - donor_coords), (j - donor_coords))
     denominator = np.dot(abs(j - donor_coords), abs((j - donor_coords)))
-    return numerator/denominator
+    return numerator / denominator
 
 
 # ------------------------------------------------------------------------
@@ -400,8 +413,9 @@ def read_xyz(in_file):
                     atom_types.append(line[0])
                     x[:] = [float(x) for x in line[1:4]]
 
-                yield namedtuple("XYZFile", ["coords", "title", "atom_types"])\
-                    (coords, title, atom_types)
+                yield namedtuple("XYZFile", ["coords", "title", "atom_types"])(
+                    coords, title, atom_types
+                )
             except ValueError:
                 break
 
@@ -434,9 +448,13 @@ def write_xyz(file_out, coords, title="", atom_types=("A",)):
     """
     file_out.write(" %d\n%s\n" % (coords.size / 3, title))
     for x, atom_type in zip(coords.reshape(-1, 3), cycle(atom_types)):
-        file_out.write("\t\t{:<3} {:14.06f} {:14.06f} {:14.06f}\n".format(atom_type, x[0], x[1], x[2]))
+        file_out.write(
+            "\t\t{:<3} {:14.06f} {:14.06f} {:14.06f}\n".format(
+                atom_type, x[0], x[1], x[2]
+            )
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
     quit()

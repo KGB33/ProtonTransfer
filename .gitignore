@@ -1,0 +1,6 @@
+.idea
+
+Pipfile.lock
+
+.pytest_cache
+/instance/

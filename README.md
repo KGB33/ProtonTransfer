@@ -2,7 +2,7 @@
 ######    _Developed By Kelton Bassingthwaite_
 
 
-This is a command line tool that creates a novel proton indicator from a coordinate file (.xyz) to highlight proton movement in acid/base chemical reactions. It then appends the indicator to the data then creates a new coordinate file. This data is commonly used in complex organic chemistry and water wire studies.
+This is a command line tool that creates a novel proton indicator from a coordinate file (.xyz) to highlight proton movement in acid/base chemical reactions. It then appends the indicator to the data and creates a new coordinate file. This data is commonly used in complex organic chemistry and water wire studies.
 
 
 ## Getting Started
@@ -21,14 +21,20 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-Then, install dependancies
+Then, install dependencies.
 
 ```
 pip install numpy matplotlib
 pip install . -e
 ```
 
-## Useage
+### Tests
+
+```
+python -m unittest ./tests
+```
+
+## Usage
 
 The script reads in a `.xyz` file.
 Appends the aproximate position of the loose proton to each step.
